@@ -7,7 +7,8 @@ import Foundation
 //MARK: - Behavior
 protocol ManageAble{
     func handleBreak(_ shouldHe:Bool)
-    func updateDailySalesAmount()
+    func updateDailySalesAmount(amount of:Int)
+    func advanceClockTime(_ byHour:Int)
 }
 //MARK: - Originator
 public class Employee:Codable , ManageAble{
@@ -17,15 +18,18 @@ public class Employee:Codable , ManageAble{
         public var clockedTime = 0
         public var todaysSales = 0
     }
-    public var state = State()
+    var state = State()
     
     init(){ state.id = UUID.init().hashValue }
     
     func handleBreak(_ shouldHe:Bool){
         state.onBreak = shouldHe
     }
-    func updateDailySalesAmount(){
-        state.todaysSales += 1
+    func updateDailySalesAmount(amount of:Int){
+        state.todaysSales += of
+    }
+    func advanceClockTime(_ byHour: Int) {
+        state.clockedTime += byHour
     }
 }
 
@@ -35,15 +39,15 @@ public class ShiftSystem{
     private let decoder = JSONDecoder()
     private let encoder = JSONEncoder()
     private let userDefaults = UserDefaults.standard
-    var dailyEmployeeList:Set<Int>
-    private init(){
-        self.dailyEmployeeList = userDefaults.retriveEmployeeHistory(.savingList)
+    var dailyEmployeeList:Set<Int>{
+        get{ userDefaults.employees(.savingList) }
+        set{ userDefaults.setValue(newValue, forKey:.savingList) }
     }
+    private init(){ }
     public func save(_ emp:Employee) throws {
         dailyEmployeeList.insert(emp.state.id!)
         let data = try encoder.encode(emp)
         userDefaults.setValue(data, forKey: String(emp.state.id!))
-        userDefaults.setValue(dailyEmployeeList, forKey:.savingList)
     }
     
     public func load(empUUID:Int) throws -> Employee{
@@ -51,7 +55,6 @@ public class ShiftSystem{
               let emp  = try? decoder.decode(Employee.self, from: data) else{
             throw Error.employeeNotFound
         }
-        dailyEmployeeList = userDefaults.retriveEmployeeHistory(.savingList)
         return emp
     }
 }
@@ -68,7 +71,7 @@ extension UserDefaults{
     enum SavingKeys: String{
         case savingList = "savingsList"
     }
-    func retriveEmployeeHistory(_ key:SavingKeys) -> Set<Int>{
+    func employees(_ key:SavingKeys) -> Set<Int>{
         if let history = array(forKey: key.rawValue) as? [Int]{
             return Set(history)
         }
@@ -83,14 +86,14 @@ extension UserDefaults{
 var employee = Employee()
 /// Creating a shiftManagement system
 let shiftSystem = ShiftSystem.shared
-/// Loading the first employee as an exmple
-if let emp = shiftSystem.dailyEmployeeList.first{ employee = try! shiftSystem.load(empUUID: emp) }
 /// Updating State
-employee.state.clockedTime += 1
+employee.updateDailySalesAmount(amount: 20)
 /// Saving
 try shiftSystem.save(employee)
+/// Loading the first employee as an exmple
+if let emp = shiftSystem.dailyEmployeeList.first{ employee = try! shiftSystem.load(empUUID: emp) }
+print("\(employee.state.todaysSales)")
 print(shiftSystem.dailyEmployeeList)
-
 //MARK: - Reset Defaults
 //var u = UserDefaults.standard
 //u.clearCache()
