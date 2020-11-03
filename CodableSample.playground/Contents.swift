@@ -66,7 +66,7 @@ public struct TimeStemp{
 }
 public extension TimeStemp{
     enum CodingKeys : String , CodingKey {
-        case stemp, time = "Time Series (30min)", one = "16:00:00 2018-10-16", tow = "15:30:00 2018-10-16"
+        case stemp, time = "Time Series (30min)", one = "16:00:00 2018-10-16", two = "15:30:00 2018-10-16"
     }
 }
 extension TimeStemp : Codable{
@@ -112,7 +112,7 @@ extension TimeStemp : Codable{
         try child.encode(stemp[DateFormatter
                                     .date(DateFormatter.dateFormatter)(from : CodingKeys.one.rawValue)!], forKey: .one)
         try child.encode(stemp[DateFormatter
-                                    .date(DateFormatter.dateFormatter)(from : CodingKeys.tow.rawValue)!], forKey: .tow)
+                                    .date(DateFormatter.dateFormatter)(from : CodingKeys.two.rawValue)!], forKey: .two)
     }
 }
 
