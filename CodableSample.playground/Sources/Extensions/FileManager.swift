@@ -8,4 +8,5 @@ public extension FileManager{
         URL(fileURLWithPath: filePath, relativeTo: documentDirectoryURL)
     }
     static let filePath = "TimeStamps.json"
+    static let errFilePath = "Error.json"
 }

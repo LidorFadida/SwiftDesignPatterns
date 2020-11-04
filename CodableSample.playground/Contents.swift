@@ -47,10 +47,10 @@ extension Stemp : Codable{
         let sType = String.self
         let container = try decoder.container(keyedBy: CodingKeys.self)
         open = try container.decode(sType, forKey: .open)
-        high = try container.decode(sType.self, forKey: .high)
-        low = try container.decode(sType.self, forKey: .low)
-        close = try container.decode(sType.self, forKey: .close)
-        volume = try container.decode(sType.self, forKey: .volume)
+        high = try container.decode(sType, forKey: .high)
+        low = try container.decode(sType, forKey: .low)
+        close = try container.decode(sType, forKey: .close)
+        volume = try container.decode(sType, forKey: .volume)
     }
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
@@ -74,7 +74,7 @@ extension TimeStemp : Codable{
         var tempStemp:[Date : Stemp] = [:]
         let parent = try! decoder.container(keyedBy: CodingKeys.self)
         guard let child = try? parent.nestedContainer(keyedBy: CodingKeys.self, forKey: .time) else {
-            stemp = [:]
+            self.stemp = [:]
             return
         }
         child.allKeys.forEach({ (k) in
@@ -109,10 +109,8 @@ extension TimeStemp : Codable{
     public func encode(to encoder: Encoder) throws {
         var parent = encoder.container(keyedBy: CodingKeys.self)
         var child = parent.nestedContainer(keyedBy: CodingKeys.self, forKey: .time)
-        try child.encode(stemp[DateFormatter
-                                    .date(DateFormatter.dateFormatter)(from : CodingKeys.one.rawValue)!], forKey: .one)
-        try child.encode(stemp[DateFormatter
-                                    .date(DateFormatter.dateFormatter)(from : CodingKeys.two.rawValue)!], forKey: .two)
+        try child.encode(stemp[DateFormatter.dateFormatter.date(from : CodingKeys.one.rawValue)!], forKey: .one)
+        try child.encode(stemp[DateFormatter.dateFormatter.date(from : CodingKeys.two.rawValue)!], forKey: .two)
     }
 }
 
@@ -154,5 +152,6 @@ public func runTest(){
             print(String(data: datum, encoding: .utf8)!)
         }
     }
+    try? Store.jsonEmpty.write(toFile: FileManager.errFilePath, atomically: true, encoding: .utf8)
 }
 runTest()

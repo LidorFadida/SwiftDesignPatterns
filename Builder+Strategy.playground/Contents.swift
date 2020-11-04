@@ -90,29 +90,35 @@ struct MasterCardStrategy: PaymentStrategy  {
 //MARK: - Example
 
 ///Creating the Builder ///
-let builder = CreditCardBuilder()
-///Updating Builder properties ///
-builder.setPaymentMethod(.credit)
-builder.setCardType(.masterCard)
-builder.setCardCode(1245)
-builder.setCardNumber("5414-3414-4134-1434")
-///Building a card
-guard let card  = try? builder.build() else {
-    fatalError("Requierd field is missing , please check out and validate your card detail ")
-}
-/// create and inform the Director
-let payment = PaymentsBackEnd(strategy: card.paymentStrategy)
-/// making an attempt to pay using the card
-do {
-    try payment.payWith(card)
-} catch let e as Error {
-    switch e {
-    case .paymentCannotBeProccesed:
-        print("Unknown Error")
-    case .cardDeclined:
-        print("Your card was decline , contact your card company if you think a mistake was made.")
-    case .networkOutOfReach:
-        print("You must be online and connected to network services to purchase.")
+func main(){
+    let builder = CreditCardBuilder()
+    ///Updating Builder properties ///
+    builder.setPaymentMethod(.credit)
+    builder.setCardType(.masterCard)
+    builder.setCardCode(1245)
+    builder.setCardNumber("5414-3414-4134-1434")
+    ///Building a card
+    guard let card  = try? builder.build() else {
+        return
     }
+    /// create and inform the Director
+    let payment = PaymentsBackEnd(strategy: card.paymentStrategy)
+    /// making an attempt to pay using the card
+    do {
+        try payment.payWith(card)
+    } catch let e  {
+        if let e = e as? Error{
+            switch e {
+            case .paymentCannotBeProccesed:
+                print("Unknown Error")
+            case .cardDeclined:
+                print("Your card was decline , contact your card company if you think a mistake was made.")
+            case .networkOutOfReach:
+                print("You must be online and connected to network services to purchase.")
+            }
+        }
+        //Handle other errors..
+    }
+    print(card)
 }
-print(card)
+main()
